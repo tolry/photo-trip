@@ -2,5 +2,13 @@
     "require": {
         "symfony/console": "^3.0",
         "miljar/php-exif": "^0.5.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "PhotoTrip\\": "src/"
+        }
+    },
+    "require-dev": {
+        "symfony/var-dumper": "^3.0"
     }
 }
