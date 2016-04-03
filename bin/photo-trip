@@ -5,9 +5,11 @@ require_once(__DIR__ . '/../vendor/autoload.php');
 
 use PhotoTrip\Command\TestCommand;
 use PhotoTrip\Command\CreateProjectCommand;
+use PhotoTrip\Command\GenerateCommand;
 use Symfony\Component\Console\Application;
 
 $application = new Application();
 $application->add(new TestCommand());
 $application->add(new CreateProjectCommand());
+$application->add(new GenerateCommand());
 $application->run();

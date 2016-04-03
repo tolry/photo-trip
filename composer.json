@@ -3,7 +3,9 @@
         "symfony/console": "^3.0",
         "miljar/php-exif": "^0.5.1",
         "doctrine/dbal": "^2.5",
-        "symfony/finder": "^3.0"
+        "symfony/finder": "^3.0",
+        "twig/twig": "^1.24",
+        "monolog/monolog": "^1.18"
     },
     "autoload": {
         "psr-4": {

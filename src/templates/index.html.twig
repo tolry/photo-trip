@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title></title>
+        <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.css" />
+        <link rel="stylesheet" href="http://leaflet.github.io/Leaflet.markercluster/dist/MarkerCluster.css" />
+        <link rel="stylesheet" href="http://leaflet.github.io/Leaflet.markercluster/dist/MarkerCluster.Default.css" />
+        <link rel="stylesheet" href="http://turban.github.io/Leaflet.Photo/Leaflet.Photo.css" />
+        <style>
+            #mapid { height: 600px; }
+        </style>
+    </head>
+    <body>
+        <div id="mapid"></div>
+        <script src="http://cdn.leafletjs.com/leaflet/v0.7.7/leaflet.js"></script>
+        <script src="http://leaflet.github.io/Leaflet.markercluster/dist/leaflet.markercluster-src.js"></script>
+        <script src="http://turban.github.io/Leaflet.Photo/Leaflet.Photo.js"></script>
+        <script>
+            var mymap = new L.map('mapid').setView([{{ gps[0][0] }}, {{ gps[0][1] }}], 13);
+            var layer = new L.TileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png');
+            mymap.addLayer(layer);
+            var photoLayer = L.photo.cluster({ spiderfyDistanceMultiplier: 1.2 }).on('click', function (evt) {
+                evt.layer.bindPopup(L.Util.template('<img src="{url}"/></a><p>{caption}</p>', evt.layer.photo), {
+                    className: 'leaflet-popup-photo',
+                    minWidth: 400
+                }).openPopup();
+            });
+            var photos = [];
+            {% for coordinates in gps %}
+            photos.push({
+                lat: {{ coordinates[0] }},
+                lng: {{ coordinates[1] }},
+                url: "thumbnails/{{ coordinates[2] }}.jpg",
+                caption: "Test",
+                thumbnail: "thumbnails/{{ coordinates[2] }}.jpg"
+            });
+            {% endfor %}
+            photoLayer.add(photos).addTo(mymap);
+            mymap.fitBounds(photoLayer.getBounds());
+        </script>
+    </body>
+</html>
