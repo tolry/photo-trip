@@ -8,7 +8,8 @@
         <link rel="stylesheet" href="http://leaflet.github.io/Leaflet.markercluster/dist/MarkerCluster.Default.css" />
         <link rel="stylesheet" href="http://turban.github.io/Leaflet.Photo/Leaflet.Photo.css" />
         <style>
-            #mapid { height: 600px; }
+            body, html { height: 100%; }
+            #mapid { height: 100%; }
         </style>
     </head>
     <body>
@@ -17,7 +18,7 @@
         <script src="http://leaflet.github.io/Leaflet.markercluster/dist/leaflet.markercluster-src.js"></script>
         <script src="http://turban.github.io/Leaflet.Photo/Leaflet.Photo.js"></script>
         <script>
-            var mymap = new L.map('mapid').setView([{{ gps[0][0] }}, {{ gps[0][1] }}], 13);
+            var mymap = new L.map('mapid').setView([{{ pictures[0].coordinates[0] }}, {{ pictures[0].coordinates[1] }}], 17);
             var layer = new L.TileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png');
             mymap.addLayer(layer);
             var photoLayer = L.photo.cluster({ spiderfyDistanceMultiplier: 1.2 }).on('click', function (evt) {
@@ -27,13 +28,13 @@
                 }).openPopup();
             });
             var photos = [];
-            {% for coordinates in gps %}
+            {% for picture in pictures %}
             photos.push({
-                lat: {{ coordinates[0] }},
-                lng: {{ coordinates[1] }},
-                url: "thumbnails/{{ coordinates[2] }}.jpg",
-                caption: "Test",
-                thumbnail: "thumbnails/{{ coordinates[2] }}.jpg"
+                lat: {{ picture.coordinates[0] }},
+                lng: {{ picture.coordinates[1] }},
+                url: "thumbnails/{{ picture.sha1 }}.jpg",
+                caption: "<b>{{ picture.creation_date|date('d.m.Y H:i:s') }}</b> {{ picture.path }}",
+                thumbnail: "thumbnails/{{ picture.sha1 }}.jpg"
             });
             {% endfor %}
             photoLayer.add(photos).addTo(mymap);

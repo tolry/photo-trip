@@ -5,8 +5,10 @@
 
 namespace PhotoTrip\Command;
 
+use Imagine\Imagick\Imagine;
 use Monolog\Logger;
 use Monolog\Handler\StreamHandler;
+use PHPExif\Reader\Reader as ExifReader;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -14,41 +16,44 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Finder\Finder;
-use PHPExif\Reader\Reader as ExifReader;
 
-class GenerateCommand extends Command
+class UpdateThumbnailsCommand extends Command
 {
     protected function configure()
     {
         $this
-            ->setName('generate')
-            ->setDescription('generate html page')
-        ;
+            ->setName('update-thumbnails')
+            ->setDescription('generate all thumbnails anew')
+            ;
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $cwd = getcwd();
-
         $conn = $this->connectToDatabase($cwd);
 
-        //$progressBar = new ProgressBar($output, count($finder));
-        $pictures = array_map(
-            function ($row) {
-                $row['coordinates'] = explode(',', json_decode($row['coordinates']));
-                $row['path'] = basename($row['path']);
+        $pictures = $conn->fetchAll("SELECT * FROM picture");
+        //$pictures = $conn->fetchAll("SELECT * FROM picture WHERE coordinates IS NOT NULL AND coordinates <> '\"\"'");
 
-                return $row;
-            },
-            $conn->fetchAll("SELECT * FROM picture WHERE coordinates IS NOT NULL AND coordinates <> '\"\"'")
-        );
+        $imagine = new Imagine();
+        $size = new \Imagine\Image\Box(400, 400);
+        $mode = \Imagine\Image\ImageInterface::THUMBNAIL_INSET;
+        $mode = \Imagine\Image\ImageInterface::THUMBNAIL_OUTBOUND;
 
-        //$progressBar->finish();
+        $progressBar = new ProgressBar($output, count($pictures));
+        foreach ($pictures as $picture) {
+            $progressBar->advance();
+            if (! file_exists($picture['path'])) {
+                syslog(LOG_ERROR, 'missing path ' . $picture['path']);
+                continue;
+            }
 
-        $loader = new \Twig_Loader_Filesystem(__DIR__ . '/../templates');
-        $twig = new \Twig_Environment($loader);
-        $html = $twig->render('index.html.twig', ['pictures' => $pictures]);
-        file_put_contents($cwd . '/index.html', $html);
+            $imagine->open($picture['path'])
+                ->thumbnail($size, $mode)
+                ->save($cwd . '/thumbnails/' . $picture['sha1'] . '.jpg')
+            ;
+        }
+        $progressBar->finish();
     }
 
     private function connectToDatabase($directory)

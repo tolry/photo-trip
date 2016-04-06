@@ -5,7 +5,8 @@
         "doctrine/dbal": "^2.5",
         "symfony/finder": "^3.0",
         "twig/twig": "^1.24",
-        "monolog/monolog": "^1.18"
+        "monolog/monolog": "^1.18",
+        "imagine/imagine": "^0.6.3"
     },
     "autoload": {
         "psr-4": {
